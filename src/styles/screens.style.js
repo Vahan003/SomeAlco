@@ -4,7 +4,7 @@ export const screen = (rest) => ({
        flexDirection: 'row',
        marginTop: "0",
        maxHeigth: "85vh",
-       paddingTop: "11vh"
+       paddingTop: "13vh"
 })
 
 export const aside = (rest) => ({

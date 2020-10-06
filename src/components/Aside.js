@@ -22,7 +22,7 @@ import {aside} from '../styles/screens.style'
 export default function Aside(props) {
 
   const useStyles = makeStyles((theme) => {
-    console.log(theme)
+    //console.log(theme)
     return ({
     root: {
       width: '97%',

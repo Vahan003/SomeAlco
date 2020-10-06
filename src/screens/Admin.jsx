@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Firebase from "../firebase/firebase";
+import {useHistory} from 'react-router-dom'
 export default function Admin(props) {
   const style = {
     display: "flex",
@@ -57,8 +58,21 @@ export default function Admin(props) {
   const [updatingPerson, setUpdatingPerson] = useState(false);
   const [id, setId] = useState(null);
   const [refresh, setRefresh] = useState(new Date());
+  const [auth, setAuth] = useState("")
+  const history = useHistory()
   useEffect(() => {
     console.log("RUN>>>");
+    async function authWithGoogle() {
+      if(!localStorage.getItem("AUTH_TOKEN")){
+      const _auth =  await Firebase.authGoogle()
+      localStorage.setItem("AUTH_TOKEN", _auth)
+      setAuth(_auth)
+      }
+      else {
+      setAuth(localStorage.getItem("AUTH_TOKEN"))  
+      }
+    }
+    authWithGoogle()
     const test = Firebase.db.collection("test").doc("Test");
     test
       .get()
@@ -112,6 +126,12 @@ export default function Admin(props) {
       }
       
   }, [refresh]);
+  const exit = async () =>{
+    Firebase.authGoogleSignOut()
+        localStorage.removeItem("AUTH_TOKEN")
+        alert("Admin, sign-out successful")
+        history.push("/")
+  }
   //--------------------------------------------------------------------------
   const handleInputProd = (e) => {
     setPostProd({
@@ -352,8 +372,12 @@ export default function Admin(props) {
 
   // -------PERSON----------------------------------------------------------------
   return (
-    <div>
+    <>
+    
+      {
+        auth &&
       <div style={!disable ? styleSc : displayNone}>
+      <button onClick = {()=> exit()} style = {{"position": "fixed"}}>Exit</button> 
         <div
           style={
             checkProduct() ? style : !updatingProduct ? styleRed : styleGreen
@@ -669,9 +693,11 @@ export default function Admin(props) {
           </div>
         </div>
       </div>
+      }
       {
         //<div style = {styleItem}>{refresh.toString()}</div>
       }
-    </div>
+      
+    </>
   );
 }

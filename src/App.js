@@ -1,10 +1,11 @@
-import React,{useState,useLocation} from "react";
+import React,{useState,useLocation, useEffect} from "react";
 import {
   HashRouter as Router,
   Switch,
   Route,
   Link
 } from "react-router-dom";
+import Firebase from "./firebase/firebase";
 import {navigation, navigationLi, navigationA, header,top} from './styles/App.style'
 import Home from './screens/Home'
 import Users from './screens/Users'
@@ -19,9 +20,7 @@ export default function App() {
 
   const [pressed,setPressed] = useState("home")
   const [mainTheme,setMainTheme] = useState({colorChange : {}, colorMain: {}})
-  
-  
-   
+ 
   const {colorChange,colorMain } = mainTheme
 
   const changeTheme = (colorX,colorY)=>{
@@ -30,9 +29,12 @@ export default function App() {
       colorMain: {...colorY}
     })
   }
-  
+  useEffect(()=>{
+   return () =>{
+   
+   }
+  },[])
   return (
-    
     <Router>
       <div >
       <div style={top()}>
