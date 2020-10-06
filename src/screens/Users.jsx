@@ -18,17 +18,16 @@ useEffect(()=>{
       .get()
       .then(function (querySnapshot) {
         querySnapshot.forEach(function (doc) {
-          
           const image = Firebase.storeRef.child(`${doc.data().src}`)
           image.getDownloadURL().then(url => {
           const p = doc.data();
           const obj = { id: doc.id, url:url, ...p };
-          person.push(obj);
-          setPerson([...person]);
-          setLoading(false);
-          //console.log(obj)
+          setPerson(prev => [...prev, obj])
           })
         });
+      })
+      .then(()=>{
+        setLoading(false);
       });
 },[])
 

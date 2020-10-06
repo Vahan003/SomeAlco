@@ -59,14 +59,12 @@ export default function Admin(props) {
   const [refresh, setRefresh] = useState(new Date());
   useEffect(() => {
     console.log("RUN>>>");
-    let test = Firebase.db.collection("test").doc("Test");
+    const test = Firebase.db.collection("test").doc("Test");
     test
       .get()
       .then((d) => {
         // console.log(d.data());
-        setProduct([]);
-        setPerson([]);
-        //  setPostProd({})
+        //setPostProd({})
         //  setPostPerson({})
         setDisable(false);
       })
@@ -91,8 +89,7 @@ export default function Admin(props) {
             id: doc.id,
             ...p,
           };
-          person.push(obj);
-          setPerson([...person]);
+          setPerson(prev => [...prev, obj]);
         });
       });
 
@@ -106,10 +103,14 @@ export default function Admin(props) {
             id: doc.id,
             ...p,
           };
-          product.push(obj);
-          setProduct([...product]);
+          setProduct(prev => [...prev, obj])
         });
       });
+      return () => {
+        setProduct([]);
+        setPerson([]);
+      }
+      
   }, [refresh]);
   //--------------------------------------------------------------------------
   const handleInputProd = (e) => {
@@ -158,7 +159,6 @@ export default function Admin(props) {
           { ...postProd, src: data.metadata.fullPath, date: new Date() },
           "product"
         ).then((d) => {
-          //console.log(d.id);
           let product = { id: d.id };
           Firebase.db
             .collection("person")
@@ -169,7 +169,6 @@ export default function Admin(props) {
               person.doc(postProd.owner).update({
                 products: [...res.data().products, product],
               });
-              //window.location.reload(false);
               setRefresh(new Date());
             });
         })
@@ -186,7 +185,6 @@ export default function Admin(props) {
       owner: personFind ? personFind.id : "",
     });
     setUpdatingProduct(true);
-    // console.log(postProd)
   };
 
   const updateToProd = () => {
@@ -198,7 +196,6 @@ export default function Admin(props) {
           ...postProd,
         })
         .then(() => {
-          //window.location.reload(false);
           setUpdatingProduct(false);
           setRefresh(new Date());
         })
@@ -231,15 +228,14 @@ export default function Admin(props) {
                   products: [...pChange],
                 });
                 //window.location.reload(false);
-                setRefresh(new Date());
+              }).catch((e) =>{
+                
               });
+              setRefresh(new Date());
           });
       })
       .catch((e) => {
-        // console.log(e.message);
-        if (
-          e.message === `Firebase Storage: Object '${el.src}' does not exist.`
-        ) {
+          alert(e.message)
           alert(`Image not exist! Data of ${el.id} will be deleted`);
           Firebase.db
             .collection("product")
@@ -260,12 +256,13 @@ export default function Admin(props) {
                     products: [...pChange],
                   });
                   //window.location.reload(false);
-                  setRefresh(new Date());
+                }).catch((e)=>{
+                   alert("No owner!", e)
                 });
+                setRefresh(new Date());
+            }).catch((e)=>{
+               alert("Something happen, nothing is changed!", e)
             });
-        } else {
-          alert(e.message);
-        }
       });
   };
   // -------PRODUCT----------------------------------------------------------------
@@ -316,7 +313,6 @@ export default function Admin(props) {
           ...postPerson,
         })
         .then(() => {
-          //window.location.reload(false);
           setUpdatingPerson(false);
           setRefresh(new Date());
         })
@@ -340,21 +336,17 @@ export default function Admin(props) {
       })
       .catch((e) => {
         //console.log(e.message);
-        if (
-          e.message === `Firebase Storage: Object '${el.src}' does not exist.`
-        ) {
+          alert(e.message);
           alert(`Image not exist! Data of ${el.id} will be deleted`);
           Firebase.db
             .collection("person")
             .doc(el.id)
             .delete()
             .then(() => {
-              // window.location.reload(false);
               setRefresh(new Date());
-            });
-        } else {
-          alert(e.message);
-        }
+            }).catch((e)=>{
+          alert("Something happen, nothing is changed!");
+        })
       });
   };
 
@@ -515,18 +507,6 @@ export default function Admin(props) {
                         <div className="key">{`${key}`}</div>
                         <div
                           className="val"
-                          onMouseEnter={(e) => {
-                            e.target.style.height = "auto";
-                            e.target.style.width = "auto";
-                            e.target.style.overflow = "visible"
-                            e.target.style.border = "1px solid gray";
-                          }}
-                          onMouseOut={(e) => {
-                            e.target.style.height = "15px";
-                            e.target.style.width = "60px";
-                            e.target.style.overflow = "hidden"
-                            e.target.style.border = "0";
-                          }}
                         >{`${el[key]}`}</div>
                       </td>
                     ))}
@@ -673,24 +653,14 @@ export default function Admin(props) {
                         <div className="key">{`${key}`}</div>
                         <div
                           className="val"
-                          onMouseEnter={(e) => {
-                            e.target.style.height = "auto";
-                            e.target.style.width = "auto";
-                            e.target.style.border = "1px solid gray";
-                          }}
-                          onMouseOut={(e) => {
-                            e.target.style.height = "15px";
-                            e.target.style.width = "60px";
-                            e.target.style.border = "0";
-                          }}
                         >{`${el[key]}`}</div>
                       </td>
                     ))}
                     <td>
-                      <button onClick={() => handleUpdateProd(el)}>
+                      <button onClick={() => handleUpdatePerson(el)}>
                         Update
                       </button>
-                      <button onClick={() => deleteFromProd(el)}>Delete</button>
+                      <button onClick={() => deleteFromPerson(el)}>Delete</button>
                     </td>
                   </tr>
                 ))}
