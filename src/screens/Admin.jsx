@@ -1,51 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Firebase from "../firebase/firebase";
-import {useHistory} from 'react-router-dom'
+import { useHistory } from "react-router-dom";
+import "../styles/admin.styles.css";
 export default function Admin(props) {
-  const style = {
-    display: "flex",
-    flexDirection: "column",
-    flex: 1,
-    margin: "10px",
-    border: "1px solid grey",
-  };
-  const styleRed = {
-    display: "flex",
-    flexDirection: "column",
-    flex: 1,
-    margin: "10px",
-    border: "1px solid red",
-  };
-  const styleGreen = {
-    display: "flex",
-    flexDirection: "column",
-    flex: 1,
-    margin: "10px",
-    border: "1.5px solid green",
-  };
-  const styleItem = {
-    padding: "5px",
-  };
-  const styleSc = {
-    display: "flex",
-    paddingTop: "11vh",
-  };
-  const textArea = {
-    height: "200px",
-    flex: 1,
-  };
-  const styleB = {
-    padding: "5px",
-    margin: "5px",
-    width: "45%",
-  };
-  const displayNone = {
-    visibility: "hidden",
-  };
-  const description = {
-    display: "flex",
-    justifyContent: "space-between",
-  };
   const [disable, setDisable] = useState(true);
   const [category, setCategory] = useState([]);
   const [postProd, setPostProd] = useState({});
@@ -58,28 +15,26 @@ export default function Admin(props) {
   const [updatingPerson, setUpdatingPerson] = useState(false);
   const [id, setId] = useState(null);
   const [refresh, setRefresh] = useState(new Date());
-  const [auth, setAuth] = useState("")
-  const history = useHistory()
+  const [auth, setAuth] = useState("");
+  const history = useHistory();
+
   useEffect(() => {
     console.log("RUN>>>");
     async function authWithGoogle() {
-      if(!localStorage.getItem("AUTH_TOKEN")){
-      const _auth =  await Firebase.authGoogle()
-      localStorage.setItem("AUTH_TOKEN", _auth)
-      setAuth(_auth)
-      }
-      else {
-      setAuth(localStorage.getItem("AUTH_TOKEN"))  
+      if (!localStorage.getItem("AUTH_TOKEN")) {
+        const _auth = await Firebase.authGoogle();
+        localStorage.setItem("AUTH_TOKEN", _auth);
+        setAuth(_auth);
+      } else {
+        setAuth(localStorage.getItem("AUTH_TOKEN"));
       }
     }
-    authWithGoogle()
+    authWithGoogle();
     const test = Firebase.db.collection("test").doc("Test");
     test
       .get()
       .then((d) => {
         // console.log(d.data());
-        //setPostProd({})
-        //  setPostPerson({})
         setDisable(false);
       })
       .catch(() => {
@@ -103,7 +58,7 @@ export default function Admin(props) {
             id: doc.id,
             ...p,
           };
-          setPerson(prev => [...prev, obj]);
+          setPerson((prev) => [...prev, obj]);
         });
       });
 
@@ -117,21 +72,20 @@ export default function Admin(props) {
             id: doc.id,
             ...p,
           };
-          setProduct(prev => [...prev, obj])
+          setProduct((prev) => [...prev, obj]);
         });
       });
-      return () => {
-        setProduct([]);
-        setPerson([]);
-      }
-      
+    return () => {
+      setProduct([]);
+      setPerson([]);
+    };
   }, [refresh]);
-  const exit = async () =>{
-    Firebase.authGoogleSignOut()
-        localStorage.removeItem("AUTH_TOKEN")
-        alert("Admin, sign-out successful")
-        history.push("/")
-  }
+  const exit = async () => {
+    Firebase.authGoogleSignOut();
+    localStorage.removeItem("AUTH_TOKEN");
+    alert("Admin, sign-out successful");
+    history.push("/");
+  };
   //--------------------------------------------------------------------------
   const handleInputProd = (e) => {
     setPostProd({
@@ -190,6 +144,7 @@ export default function Admin(props) {
                 products: [...res.data().products, product],
               });
               setRefresh(new Date());
+              setPostProd(prev => ({}))
             });
         })
       );
@@ -199,11 +154,11 @@ export default function Admin(props) {
     const personFind = person.find((e) => e.id === el.owner);
     const { id, ...elem } = el;
     setId(id);
-    setPostProd({
+    setPostProd(prev => ({
       ...elem,
       date: new Date(),
       owner: personFind ? personFind.id : "",
-    });
+    }));
     setUpdatingProduct(true);
   };
 
@@ -218,6 +173,7 @@ export default function Admin(props) {
         .then(() => {
           setUpdatingProduct(false);
           setRefresh(new Date());
+          setPostProd(prev => ({}))
         })
         .catch(() => alert("Something happen, nothing is changed!"));
     }
@@ -248,41 +204,42 @@ export default function Admin(props) {
                   products: [...pChange],
                 });
                 //window.location.reload(false);
-              }).catch((e) =>{
-                
-              });
-              setRefresh(new Date());
+              })
+              .catch((e) => {});
+            setRefresh(new Date());
           });
       })
       .catch((e) => {
-          alert(e.message)
-          alert(`Image not exist! Data of ${el.id} will be deleted`);
-          Firebase.db
-            .collection("product")
-            .doc(el.id)
-            .delete()
-            .then(() => {
-              Firebase.db
-                .collection("person")
-                .doc(el.owner)
-                .get()
-                .then((res) => {
-                  const pChange = res
-                    .data()
-                    .products.filter((elem) => elem.id !== el.id);
-                  //console.log(pChange);
-                  let person = Firebase.db.collection("person");
-                  person.doc(el.owner).update({
-                    products: [...pChange],
-                  });
-                  //window.location.reload(false);
-                }).catch((e)=>{
-                   alert("No owner!", e)
+        alert(e.message);
+        alert(`Image not exist! Data of ${el.id} will be deleted`);
+        Firebase.db
+          .collection("product")
+          .doc(el.id)
+          .delete()
+          .then(() => {
+            Firebase.db
+              .collection("person")
+              .doc(el.owner)
+              .get()
+              .then((res) => {
+                const pChange = res
+                  .data()
+                  .products.filter((elem) => elem.id !== el.id);
+                //console.log(pChange);
+                let person = Firebase.db.collection("person");
+                person.doc(el.owner).update({
+                  products: [...pChange],
                 });
-                setRefresh(new Date());
-            }).catch((e)=>{
-               alert("Something happen, nothing is changed!", e)
-            });
+                //window.location.reload(false);
+              })
+              .catch((e) => {
+                alert("No owner!", e);
+              });
+            setRefresh(new Date());
+          })
+          .catch((e) => {
+            alert("Something happen, nothing is changed!", e);
+          });
       });
   };
   // -------PRODUCT----------------------------------------------------------------
@@ -306,6 +263,7 @@ export default function Admin(props) {
         ).then((d) => {
           //window.location.reload(false);
           setRefresh(new Date());
+          setPostPerson(prev => ({}))
         })
       );
     }
@@ -335,6 +293,7 @@ export default function Admin(props) {
         .then(() => {
           setUpdatingPerson(false);
           setRefresh(new Date());
+          setPostPerson(prev => ({}))
         })
         .catch(() => alert("Something happen, nothing is changed!"));
     }
@@ -350,168 +309,186 @@ export default function Admin(props) {
           .doc(el.id)
           .delete()
           .then(() => {
-            // window.location.reload(false);
             setRefresh(new Date());
           });
       })
       .catch((e) => {
-        //console.log(e.message);
-          alert(e.message);
-          alert(`Image not exist! Data of ${el.id} will be deleted`);
-          Firebase.db
-            .collection("person")
-            .doc(el.id)
-            .delete()
-            .then(() => {
-              setRefresh(new Date());
-            }).catch((e)=>{
-          alert("Something happen, nothing is changed!");
-        })
+        alert(e.message);
+        alert(`Image not exist! Data of ${el.id} will be deleted`);
+        Firebase.db
+          .collection("person")
+          .doc(el.id)
+          .delete()
+          .then(() => {
+            setRefresh(new Date());
+          })
+          .catch((e) => {
+            alert("Something happen, nothing is changed!");
+          });
       });
   };
-
   // -------PERSON----------------------------------------------------------------
+  const orderObectKeys = (obj) => {
+    const ordered = {};
+    Object.keys(obj)
+      .sort()
+      .forEach(function (key) {
+        ordered[key] = obj[key];
+      });
+    return ordered;
+  };
+  const detEmpty = (val) => {
+     return val ? val : ""
+  }
   return (
     <>
-    
-      {
-        auth &&
-      <div style={!disable ? styleSc : displayNone}>
-      <button onClick = {()=> exit()} style = {{"position": "fixed"}}>Exit</button> 
-        <div
-          style={
-            checkProduct() ? style : !updatingProduct ? styleRed : styleGreen
-          }
-        >
-          Create Product
-          <div style={styleItem}>
-            <input
-              type="file"
-              onChange={(e) => {
-                setFileProduct(e.target.files[0]);
-              }}
-            ></input>
+      {auth && (
+        <div className={!disable ? "styleSc" : "displayNone"}>
+          <button onClick={() => exit()} style={{ position: "fixed" }}>
+            Exit
+          </button>
+          <div
+            className={
+              checkProduct()
+                ? "style"
+                : !updatingProduct
+                ? "styleRed"
+                : "styleGreen"
+            }
+          >
+            Create Product
+            <div className={"styleItem"}>
+              <input
+                type="file"
+                onChange={(e) => {
+                  setFileProduct(e.target.files[0]);
+                }}
+              ></input>
 
-            <input
-              name="name"
-              placeholder="name"
-              onChange={handleInputProd}
-              value={postProd.name}
-            ></input>
-
-            <input
-              name="name_ru"
-              placeholder="name_ru"
-              onChange={handleInputProd}
-              value={postProd.name_ru}
-            ></input>
-
-            <input
-              name="name_am"
-              placeholder="name_am"
-              onChange={handleInputProd}
-              value={postProd.name_am}
-            ></input>
-          </div>
-          <div style={style}>
-            <div style={description}>
-              <textarea
-                name="description"
-                placeholder="description"
+              <input
+                name="name"
+                placeholder="name"
                 onChange={handleInputProd}
-                style={textArea}
-                value={postProd.description}
-              ></textarea>
+                value={detEmpty(postProd.name)}
+              ></input>
 
-              <textarea
-                name="description_ru"
-                placeholder="description_ru"
+              <input
+                name="name_ru"
+                placeholder="name_ru"
                 onChange={handleInputProd}
-                style={textArea}
-                value={postProd.description_ru}
-              ></textarea>
+                value={detEmpty(postProd.name_ru)}
+              ></input>
 
-              <textarea
-                name="description_am"
-                placeholder="description_am"
+              <input
+                name="name_am"
+                placeholder="name_am"
                 onChange={handleInputProd}
-                style={textArea}
-                value={postProd.description_am}
-              ></textarea>
+                value={detEmpty(postProd.name_am)}
+              ></input>
             </div>
+            <div className={"inSec"}>
+              <div className={"description"}>
+                <textarea
+                  name="description"
+                  placeholder="description"
+                  onChange={handleInputProd}
+                  className={"textArea"}
+                  value={detEmpty(postProd.description)}
+                ></textarea>
 
-            <input
-              name="price"
-              placeholder="price"
-              type="number"
-              onChange={handleInputProd}
-              style={styleB}
-              value={postProd.price}
-            ></input>
+                <textarea
+                  name="description_ru"
+                  placeholder="description_ru"
+                  onChange={handleInputProd}
+                  className={"textArea"}
+                  value={detEmpty(postProd.description_ru) }
+                ></textarea>
 
-            <select
-              name="category"
-              onChange={(e) => {
-                handleInputProd(e);
-                findCategory();
-              }}
-              style={styleB}
-              value={postProd.category}
-            >
-              <option label="Choose category"></option>
-              {category.map((el, index) => (
-                <option key={index}>{`${el.name}`}</option>
-              ))}
-            </select>
-
-            {postProd.category && (
-              <select
-                name="type"
-                onChange={handleInputProd}
-                style={styleB}
-                value={postProd.type}
-              >
-                <option label="Choose type"></option>
-                {findCategory().type.map((el, index) => (
-                  <option key={index}>{el}</option>
-                ))}
-              </select>
-            )}
-
-            {!updatingProduct && (
-              <select name="owner" onChange={handleInputProd} style={styleB}>
-                <option label="Choose owner"></option>
-                {person.map((el, index) => (
-                  <option key={index} label={el.name}>
-                    {el.id}
-                  </option>
-                ))}
-              </select>
-            )}
-            {!updatingProduct ? (
-              <button style={styleB} onClick={postToProd}>
-                Submit
-              </button>
-            ) : (
-              <div>
-                <button style={styleB} onClick={updateToProd}>
-                  Update
-                </button>
-                <button
-                  style={styleB}
-                  onClick={() => {
-                    setUpdatingProduct(false);
-                  }}
-                >
-                  Cancel
-                </button>
+                <textarea
+                  name="description_am"
+                  placeholder="description_am"
+                  onChange={handleInputProd}
+                  className={"textArea"}
+                  value={detEmpty(postProd.description_am)}
+                ></textarea>
               </div>
-            )}
-          </div>
-          <div style={{ fontSize: " 10px" }}>
-            <table>
-              <tbody>
-                {/*
+
+              <input
+                name="price"
+                placeholder="price"
+                type="number"
+                onChange={handleInputProd}
+                className={"styleB"}
+                value={detEmpty(postProd.price)}
+              ></input>
+
+              <select
+                name="category"
+                onChange={(e) => {
+                  handleInputProd(e);
+                  findCategory();
+                }}
+                className={"styleB"}
+                value={detEmpty(postProd.category)}
+              >
+                <option label="Choose category"></option>
+                {category.map((el, index) => (
+                  <option key={index}>{`${el.name}`}</option>
+                ))}
+              </select>
+
+              {postProd.category && (
+                <select
+                  name="type"
+                  onChange={handleInputProd}
+                  className={"styleB"}
+                  value={detEmpty(postProd.type)}
+                >
+                  <option label="Choose type"></option>
+                  {findCategory().type.map((el, index) => (
+                    <option key={index}>{el}</option>
+                  ))}
+                </select>
+              )}
+
+              {!updatingProduct && (
+                <select
+                  name="owner"
+                  onChange={handleInputProd}
+                  className={"styleB"}
+                >
+                  <option label="Choose owner"></option>
+                  {person.map((el, index) => (
+                    <option key={index} label={el.name}>
+                      {el.id}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {!updatingProduct ? (
+                <button className={"styleButton"} onClick={postToProd}>
+                  Submit
+                </button>
+              ) : (
+                <div>
+                  <button className={"styleButton"} onClick={updateToProd}>
+                    Update
+                  </button>
+                  <button
+                    className={"styleButton"}
+                    onClick={() => {
+                      setUpdatingProduct(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+            <div style={{ fontSize: " 10px" }}>
+              <table className="blueTable">
+                <tbody>
+                  {/*
               <tr>
                 <th>id</th>
                 <th>name</th>
@@ -524,139 +501,149 @@ export default function Admin(props) {
                 <th>category</th>
               </tr> 
               */}
-                {product.map((el) => (
-                  <tr key={el.id}>
-                    {Object.keys(el).map((key, index) => (
-                      <td key={index}>
-                        <div className="key">{`${key}`}</div>
-                        <div
-                          className="val"
-                        >{`${el[key]}`}</div>
+                  {product.map((el) => (
+                    <tr key={el.id}>
+                      {Object.keys(orderObectKeys(el)).map((key, index) => (
+                        <td key={index}>
+                          <div className="keyTd">{`${key}`}</div>
+                          <div className="valTd">{`${el[key]}`}</div>
+                        </td>
+                      ))}
+                      <td>
+                        <button
+                          onClick={() => handleUpdateProd(el)}
+                          className={"styleButton"}
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={() => deleteFromProd(el)}
+                          className={"styleButton"}
+                        >
+                          Delete
+                        </button>
                       </td>
-                    ))}
-                    <td>
-                      <button onClick={() => handleUpdateProd(el)}>
-                        Update
-                      </button>
-                      <button onClick={() => deleteFromProd(el)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div
-          style={
-            checkPerson() ? style : !updatingPerson ? styleRed : styleGreen
-          }
-        >
-          Create Person
-          <div style={styleItem}>
-            <input
-              type="file"
-              onChange={(e) => {
-                setFilePerson(e.target.files[0]);
-              }}
-            ></input>
-
-            <input
-              name="name"
-              placeholder="name"
-              onChange={handleInputPerson}
-              value={postPerson.name}
-            ></input>
-
-            <input
-              name="name_ru"
-              placeholder="name_ru"
-              onChange={handleInputPerson}
-              value={postPerson.name_ru}
-            ></input>
-
-            <input
-              name="name_am"
-              placeholder="name_am"
-              onChange={handleInputPerson}
-              value={postPerson.name_am}
-            ></input>
-          </div>
-          <div style={style}>
-            <div style={description}>
-              <textarea
-                name="about"
-                placeholder="about"
-                onChange={handleInputPerson}
-                style={textArea}
-                value={postPerson.about}
-              ></textarea>
-
-              <textarea
-                name="about_ru"
-                placeholder="about_ru"
-                onChange={handleInputPerson}
-                style={textArea}
-                value={postPerson.about_ru}
-              ></textarea>
-
-              <textarea
-                name="about_am"
-                placeholder="about_am"
-                onChange={handleInputPerson}
-                style={textArea}
-                value={postPerson.about_am}
-              ></textarea>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div>
+          </div>
+
+          <div
+            className={
+              checkPerson()
+                ? "style"
+                : !updatingPerson
+                ? "styleRed"
+                : "styleGreen"
+            }
+          >
+            Create Person
+            <div className={"styleItem"}>
               <input
-                name="phone"
-                placeholder="phone"
-                onChange={handleInputPerson}
-                style={styleB}
-                value={postPerson.phone}
+                type="file"
+                onChange={(e) => {
+                  setFilePerson(e.target.files[0]);
+                }}
               ></input>
+
               <input
-                name="phone1"
-                placeholder="phone1"
+                name="name"
+                placeholder="name"
                 onChange={handleInputPerson}
-                style={styleB}
-                value={postPerson.phone1}
+                value={detEmpty(postPerson.name)}
+              ></input>
+
+              <input
+                name="name_ru"
+                placeholder="name_ru"
+                onChange={handleInputPerson}
+                value={detEmpty(postPerson.name_ru)}
+              ></input>
+
+              <input
+                name="name_am"
+                placeholder="name_am"
+                onChange={handleInputPerson}
+                value={detEmpty(postPerson.name_am)}
               ></input>
             </div>
+            <div className={"inSec"}>
+              <div className={"description"}>
+                <textarea
+                  name="about"
+                  placeholder="about"
+                  onChange={handleInputPerson}
+                  className={"textArea"}
+                  value={detEmpty(postPerson.about)}
+                ></textarea>
 
-            <input
-              name="category"
-              placeholder="category"
-              onChange={handleInputPerson}
-              style={styleB}
-              value={postPerson.category}
-            ></input>
+                <textarea
+                  name="about_ru"
+                  placeholder="about_ru"
+                  onChange={handleInputPerson}
+                  className={"textArea"}
+                  value={detEmpty(postPerson.about_ru)}
+                ></textarea>
 
-            {!updatingPerson ? (
-              <button style={styleB} onClick={postToPerson}>
-                Submit
-              </button>
-            ) : (
-              <div>
-                <button style={styleB} onClick={updateToPerson}>
-                  Update
-                </button>
-                <button
-                  style={styleB}
-                  onClick={() => {
-                    setUpdatingPerson(false);
-                  }}
-                >
-                  Cancel
-                </button>
+                <textarea
+                  name="about_am"
+                  placeholder="about_am"
+                  onChange={handleInputPerson}
+                  className={"textArea"}
+                  value={detEmpty(postPerson.about_am)}
+                ></textarea>
               </div>
-            )}
-          </div>
-          <div style={{ fontSize: " 10px" }}>
-            <table>
-              <tbody>
-                {/*
+              <div>
+                <input
+                  name="phone"
+                  placeholder="phone"
+                  onChange={handleInputPerson}
+                  className={"styleB"}
+                  value={detEmpty(postPerson.phone)}
+                ></input>
+                <input
+                  name="phone1"
+                  placeholder="phone1"
+                  onChange={handleInputPerson}
+                  className={"styleB"}
+                  value={detEmpty(postPerson.phone1)}
+                ></input>
+              </div>
+
+              <input
+                name="category"
+                placeholder="category"
+                onChange={handleInputPerson}
+                className={"styleB"}
+                value={detEmpty(postPerson.category)}
+              ></input>
+
+              {!updatingPerson ? (
+                <button className={"styleButton"} onClick={postToPerson}>
+                  Submit
+                </button>
+              ) : (
+                <div>
+                  <button className={"styleButton"} onClick={updateToPerson}>
+                    Update
+                  </button>
+                  <button
+                    className={"styleButton"}
+                    onClick={() => {
+                      setUpdatingPerson(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+            <div style={{ fontSize: " 10px" }}>
+              <table className="blueTable">
+                <tbody>
+                  {/*
               <tr>
                 <th>id</th>
                 <th>name</th>
@@ -670,34 +657,39 @@ export default function Admin(props) {
                 <th>category</th>
               </tr>
               */}
-                {person.map((el) => (
-                  <tr key={el.id}>
-                    {Object.keys(el).map((key, index) => (
-                      <td key={index}>
-                        <div className="key">{`${key}`}</div>
-                        <div
-                          className="val"
-                        >{`${el[key]}`}</div>
+                  {person.map((el) => (
+                    <tr key={el.id}>
+                      {Object.keys(orderObectKeys(el)).map((key, index) => (
+                        <td key={index}>
+                          <div className="keyTd">{`${key}`}</div>
+                          <div className="valTd">{`${el[key]}`}</div>
+                        </td>
+                      ))}
+                      <td>
+                        <button
+                          onClick={() => handleUpdatePerson(el)}
+                          className={"styleButton"}
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={() => deleteFromPerson(el)}
+                          className={"styleButton"}
+                        >
+                          Delete
+                        </button>
                       </td>
-                    ))}
-                    <td>
-                      <button onClick={() => handleUpdatePerson(el)}>
-                        Update
-                      </button>
-                      <button onClick={() => deleteFromPerson(el)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-      }
-      {
-        //<div style = {styleItem}>{refresh.toString()}</div>
-      }
-      
+      )}
+      {/* <div 
+        className = {"styleItem"}>{refresh.toString()}
+        </div> */}
     </>
   );
 }

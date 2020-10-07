@@ -5,7 +5,6 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import Firebase from "./firebase/firebase";
 import {navigation, navigationLi, navigationA, header,top} from './styles/App.style'
 import Home from './screens/Home'
 import Users from './screens/Users'
@@ -19,7 +18,7 @@ export default function App() {
   const {color1,color2,color3,color4,color5,color6} = colors
 
   const [pressed,setPressed] = useState("home")
-  const [mainTheme,setMainTheme] = useState({colorChange : {}, colorMain: {}})
+  const [mainTheme,setMainTheme] = useState({colorChange : {...color3}, colorMain: {...color4}})
  
   const {colorChange,colorMain } = mainTheme
 
@@ -69,7 +68,7 @@ export default function App() {
             }
           <Route path = "/admin">
          {
-          <Admin color = {colorChange}/>
+          <Admin/>
          }
           </Route>
           <Route path="/">
