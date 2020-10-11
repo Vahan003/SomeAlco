@@ -12,12 +12,18 @@ export default function Home(props) {
   const [product, setProduct] = useState([]);
   useEffect(() => {
     Firebase.db
-      .collection("category")
-      .doc("_CATEGORY")
-      .get()
-      .then((d) => {
-        setCategory(d.data().alco);
+     .collection("category")
+     .get()
+     .then(function (querySnapshot) {
+      querySnapshot.forEach(function (doc) {
+        const p = doc.data();
+        const obj = {
+          id: doc.id,
+          ...p,
+        };
+        setCategory((prev) => [...prev, obj]);
       });
+    });
     Firebase.db
       .collection("product")
       .get()

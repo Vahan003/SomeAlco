@@ -20,7 +20,6 @@ import {aside} from '../styles/screens.style'
 
 
 export default function Aside(props) {
-
   const useStyles = makeStyles((theme) => {
     //console.log(theme)
     return ({
@@ -71,7 +70,7 @@ export default function Aside(props) {
       component="nav"
       aria-labelledby="nested-list-subheader"
       subheader={
-        <ListSubheader component="div" id="nested-list-subheader">
+        <ListSubheader  component="div" id="nested-list-subheader">
           Categories
         </ListSubheader>
       }
@@ -79,22 +78,22 @@ export default function Aside(props) {
     >
       { 
         props.data.map((el,index)=><div key = {index}>
-      <ListItem  button onClick={()=> {open !== el.name ? handleClick(el.name): handleClick("") }}>
+      <ListItem  button onClick={()=> {open !== el.id ? handleClick(el.id): handleClick("") }}>
         <ListItemIcon>
         <img src={Icon} width = "30px"></img>
         </ListItemIcon>
         <ListItemText primary={el.name} />
-        {open !== el.name ? <ExpandLess /> : <ExpandMore />}
+        {open !== el.id ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
      
-      <Collapse in={open === el.name} timeout="auto" unmountOnExit>
+      <Collapse in={open === el.id} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {
-            el.type.map((el,ind)=><ListItem  key = {ind} button className={classes.nested}>
+            el.type?.map((e,ind)=><ListItem  key = {ind} button className={classes.nested}>
             <ListItemIcon >
             <img src={IconSub} width = "20px"></img>
             </ListItemIcon>
-            <ListItemText primary={el} />
+            <ListItemText primary={e} />
           </ListItem>)  
           }
         </List>

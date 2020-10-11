@@ -69,6 +69,7 @@ table.blueTable {
   background-color: #eeeeee;
   width: 100%;
   text-align: left;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   border-collapse: collapse;
 }
 table.blueTable td,
@@ -134,9 +135,31 @@ table.blueTable tfoot .links a {
 }
 .keyTd {
   color: #850d0d;
+ 
 }
 .valTd {
   height: 15px;
   width: 60px;
   overflow: hidden;
+}
+.input0 {
+  display: flex;
+  margin-top : 5px;
+}
+
+.input2 {
+  width: 100%;
+}
+.types {
+  display: flex;
+  font-size: 14px;
+}
+.inputCat {
+  display: flex;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  flex-direction: column;
+  flex: 1;
+  margin: 10px;
+  background-color: #d4e6f6;
+  border: 2px solid grey
 }

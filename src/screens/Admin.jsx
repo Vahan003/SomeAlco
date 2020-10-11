@@ -5,6 +5,7 @@ import "../styles/admin.styles.css";
 export default function Admin(props) {
   const [disable, setDisable] = useState(true);
   const [category, setCategory] = useState([]);
+  const [postCategory, setPostCategory] = useState({});
   const [postProd, setPostProd] = useState({});
   const [postPerson, setPostPerson] = useState({});
   const [fileProduct, setFileProduct] = useState(null);
@@ -13,6 +14,7 @@ export default function Admin(props) {
   const [product, setProduct] = useState([]);
   const [updatingProduct, setUpdatingProduct] = useState(false);
   const [updatingPerson, setUpdatingPerson] = useState(false);
+  const [updatingCategory, setUpdatingCategory] = useState(false);
   const [id, setId] = useState(null);
   const [refresh, setRefresh] = useState(new Date());
   const [auth, setAuth] = useState("");
@@ -42,11 +44,19 @@ export default function Admin(props) {
         window.location.reload(false);
       });
 
-    let cat = Firebase.db.collection("category").doc("_CATEGORY");
-    cat.get().then((d) => {
-      setCategory(d.data().alco);
-      //  console.log(d.data().alco);
-    });
+    Firebase.db
+      .collection("category")
+      .get()
+      .then(function (querySnapshot) {
+        querySnapshot.forEach(function (doc) {
+          const p = doc.data();
+          const obj = {
+            id: doc.id,
+            ...p,
+          };
+          setCategory((prev) => [...prev, obj]);
+        });
+      });
 
     Firebase.db
       .collection("person")
@@ -78,8 +88,10 @@ export default function Admin(props) {
     return () => {
       setProduct([]);
       setPerson([]);
+      setCategory([]);
     };
   }, [refresh]);
+
   const exit = async () => {
     Firebase.authGoogleSignOut();
     localStorage.removeItem("AUTH_TOKEN");
@@ -88,6 +100,7 @@ export default function Admin(props) {
   };
   //--------------------------------------------------------------------------
   const handleInputProd = (e) => {
+    e.persist();
     setPostProd({
       ...postProd,
       [e.target.name]: `${e.target.value ? e.target.value : ""}`,
@@ -95,14 +108,28 @@ export default function Admin(props) {
   };
 
   const handleInputPerson = (e) => {
+    e.persist();
     setPostPerson({
       ...postPerson,
       [e.target.name]: `${e.target.value ? e.target.value : ""}`,
     });
   };
-  const findCategory = () => {
-    const finder = category.find((el) => el.name === postProd.category);
-    return finder;
+
+  const handleInputCategory = (e) => {
+    e.persist();
+      setPostCategory((prev) => ({
+        ...prev,
+        [e.target.name]: `${e.target.value ?? ""}`,
+      }));
+  };
+  const handleInputType = (e) => {
+    e.persist();
+      const typeArr = e.target.value.split(",");
+      const typeArrTrim = typeArr.map(el => el.trim())
+      setPostCategory((prev) => ({
+        ...prev,
+        [e.target.name]: typeArrTrim,
+      }));
   };
   const checkProduct = () =>
     // for PRODUCT
@@ -144,7 +171,7 @@ export default function Admin(props) {
                 products: [...res.data().products, product],
               });
               setRefresh(new Date());
-              setPostProd(prev => ({}))
+              setPostProd((prev) => ({}));
             });
         })
       );
@@ -154,7 +181,7 @@ export default function Admin(props) {
     const personFind = person.find((e) => e.id === el.owner);
     const { id, ...elem } = el;
     setId(id);
-    setPostProd(prev => ({
+    setPostProd((prev) => ({
       ...elem,
       date: new Date(),
       owner: personFind ? personFind.id : "",
@@ -173,7 +200,7 @@ export default function Admin(props) {
         .then(() => {
           setUpdatingProduct(false);
           setRefresh(new Date());
-          setPostProd(prev => ({}))
+          setPostProd((prev) => ({}));
         })
         .catch(() => alert("Something happen, nothing is changed!"));
     }
@@ -261,9 +288,8 @@ export default function Admin(props) {
           },
           "person"
         ).then((d) => {
-          //window.location.reload(false);
           setRefresh(new Date());
-          setPostPerson(prev => ({}))
+          setPostPerson((prev) => ({}));
         })
       );
     }
@@ -293,7 +319,7 @@ export default function Admin(props) {
         .then(() => {
           setUpdatingPerson(false);
           setRefresh(new Date());
-          setPostPerson(prev => ({}))
+          setPostPerson((prev) => ({}));
         })
         .catch(() => alert("Something happen, nothing is changed!"));
     }
@@ -327,7 +353,56 @@ export default function Admin(props) {
           });
       });
   };
-  // -------PERSON----------------------------------------------------------------
+  // -------PERSON---------------------------------------------------------------
+  // -------CATEGORY-------------------------------------------------------------
+  const postToCategory = () => {
+    Firebase.onCreate(
+      {
+        ...postCategory,
+        date: new Date(),
+      },
+      "category"
+    ).then(() => {
+      setRefresh(new Date());
+      setPostCategory((prev) => ({}));
+    });
+  };
+  const handleUpdateCategory = (el) => {
+    const { id, ...elem } = el;
+    setId(id);
+    setPostCategory((prev) => ({
+      ...elem,
+    }));
+    setUpdatingCategory(true);
+  };
+  const updateToCategory = () => {
+    Firebase.db
+      .collection("category")
+      .doc(id)
+      .update({
+        ...postCategory,
+      })
+      .then(() => {
+        setRefresh(new Date());
+        setPostCategory((prev) => ({}));
+        setUpdatingCategory(false);
+      })
+      .catch(() => alert("Something happen, nothing is changed!"));
+  };
+  const deleteFromCategory = (el) => {
+    Firebase.db
+          .collection("category")
+          .doc(el.id)
+          .delete()
+          .then(() => {
+            setRefresh(new Date());
+          });
+  }
+  const findCategory = () => {
+    const finder = category.find((el) => `${el.id}` === postProd.category);
+    return finder;
+  };
+  // -------CATEGORY-------------------------------------------------------------
   const orderObectKeys = (obj) => {
     const ordered = {};
     Object.keys(obj)
@@ -338,8 +413,8 @@ export default function Admin(props) {
     return ordered;
   };
   const detEmpty = (val) => {
-     return val ? val : ""
-  }
+    return val ? val : "";
+  };
   return (
     <>
       {auth && (
@@ -356,7 +431,7 @@ export default function Admin(props) {
                 : "styleGreen"
             }
           >
-            Create Product
+            <div>Create Product</div>
             <div className={"styleItem"}>
               <input
                 type="file"
@@ -401,7 +476,7 @@ export default function Admin(props) {
                   placeholder="description_ru"
                   onChange={handleInputProd}
                   className={"textArea"}
-                  value={detEmpty(postProd.description_ru) }
+                  value={detEmpty(postProd.description_ru)}
                 ></textarea>
 
                 <textarea
@@ -433,7 +508,7 @@ export default function Admin(props) {
               >
                 <option label="Choose category"></option>
                 {category.map((el, index) => (
-                  <option key={index}>{`${el.name}`}</option>
+                  <option key={index} label = {`${el.name}`}>{`${el.id}`}</option>
                 ))}
               </select>
 
@@ -445,7 +520,7 @@ export default function Admin(props) {
                   value={detEmpty(postProd.type)}
                 >
                   <option label="Choose type"></option>
-                  {findCategory().type.map((el, index) => (
+                  {findCategory()?.type?.map((el, index) => (
                     <option key={index}>{el}</option>
                   ))}
                 </select>
@@ -478,6 +553,7 @@ export default function Admin(props) {
                     className={"styleButton"}
                     onClick={() => {
                       setUpdatingProduct(false);
+                      setPostProd((prev) => ({}));
                     }}
                   >
                     Cancel
@@ -539,7 +615,7 @@ export default function Admin(props) {
                 : "styleGreen"
             }
           >
-            Create Person
+            <div>Create Person</div>
             <div className={"styleItem"}>
               <input
                 type="file"
@@ -633,6 +709,7 @@ export default function Admin(props) {
                     className={"styleButton"}
                     onClick={() => {
                       setUpdatingPerson(false);
+                      setPostPerson((prev) => ({}));
                     }}
                   >
                     Cancel
@@ -684,6 +761,118 @@ export default function Admin(props) {
                 </tbody>
               </table>
             </div>
+          </div>
+          <div className="style">
+            <div>Create Category</div>
+            <div className="inSec">
+              <div className="input0">
+                <input
+                  className="input1"
+                  name="name"
+                  placeholder="name"
+                  onChange={handleInputCategory}
+                  value={detEmpty(postCategory.name)}
+                />
+                <input
+                  className="input2"
+                  name="type"
+                  placeholder="type"
+                  onChange={handleInputType}
+                  value={postCategory.type?.join(",") ?? ""}
+                />
+              </div>
+              <div className="input0">
+                <input
+                  className="input1"
+                  name="name_ru"
+                  placeholder="name_ru"
+                  onChange={handleInputCategory}
+                  value={detEmpty(postCategory.name_ru)}
+                />
+                <input
+                  className="input2"
+                  name="type_ru"
+                  placeholder="type_ru"
+                  onChange={handleInputType}
+                  value={postCategory.type_ru?.join(",") ?? ""}
+                />
+              </div>
+              <div className="input0">
+                <input
+                  className="input1"
+                  name="name_am"
+                  placeholder="name_am"
+                  onChange={handleInputCategory}
+                  value={detEmpty(postCategory.name_am)}
+                />
+                <input
+                  className="input2"
+                  name="type_am"
+                  placeholder="type_am"
+                  onChange={handleInputType}
+                  value={postCategory.type_am?.join(",") ?? ""}
+                />
+              </div>
+              {
+                !updatingCategory ? (
+                <button className="styleButton" onClick={postToCategory}>
+                  Submit
+                </button>
+              ) : (
+                <div>
+                  <button className={"styleButton"} onClick={updateToCategory}>
+                    Update
+                  </button>
+                  <button
+                    className={"styleButton"}
+                    onClick={() => {
+                      setUpdatingCategory(false);
+                      setPostCategory((prev) => ({}));
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div>
+            {category.map((el, index) => (
+              <div key={index} className="inputCat">
+              <div className = "keyTd">
+                {`[ ${el.id} ] ${el.name ?? ""} --- ${el.name_ru ?? ""} --- ${
+                  el.name_am ?? ""
+                }`}
+                </div>
+                <div className="types">
+                  {el.type?.map((e, index) => (
+                    <span key={index}>{` ${e}--`}</span>
+                  ))}
+                </div>
+
+                <div className="types">
+                  {el.type_ru?.map((e, index) => (
+                    <span key={index}>{` ${e}--`}</span>
+                  ))}
+                </div>
+                <div className="types">
+                  {el.type_am?.map((e, index) => (
+                    <span key={index}>{` ${e}--`}</span>
+                  ))}
+                </div>
+                <div>
+                  <button
+                    onClick={() => handleUpdateCategory(el)}
+                    className={"styleButton"}
+                  >
+                    Update
+                  </button>
+                  <button onClick={() => deleteFromCategory(el)} className={"styleButton"}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
