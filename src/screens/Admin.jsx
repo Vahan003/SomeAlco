@@ -296,7 +296,7 @@ export default function Admin(props) {
   };
 
   const handleUpdatePerson = (el) => {
-    const productFind = product.find((e) => e.id === el.products.id);
+    //const productFind = product.find((e) => e.id === el.products.id);
     const { id, ...elem } = el;
     setId(id);
     setPostPerson({

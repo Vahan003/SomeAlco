@@ -32,10 +32,10 @@ category:{
 export const sizes = {
   size1: {
    // fontFamily: "'Open Sans', sans-serif",
-    padding: "5px",
-    fontSize: "20px"
+    padding: "0.1rem",
+    fontSize: "1.6rem"
   },
   size2: {
-    padding: "10px"
+    padding: "1.6rem"
   }
 }

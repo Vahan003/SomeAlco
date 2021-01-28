@@ -4,17 +4,25 @@ img {
 button {
     border: 0;
     cursor: pointer;
+    outline: none;
 }
 .card_img {
-    border-radius: 5px;
-    position: relative;
-    height: 140px;
-    width: 110px;
+    border-radius: 0.5rem;
+    position: absolute;
+    /*top: 50%;
+    left: 50%; */
+    top: 10%;
+    height: 70%;
+    width: 60%;
     transition: 0.1s ease;
-    background-color: #ffffff;
-    border-radius: 10px;
+    background-color: #ffffff;  
+    
 }
 .card_img:hover { 
     transition: 0.4s ease;
-    transform: scale(1.4)
+    transform: scale(2);
+}
+
+.loader{
+    height: 20rem;
 }

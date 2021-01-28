@@ -2,9 +2,9 @@ export const card = (rest) =>({
     ...rest,
     display: "flex",
     backgroundColor: "#fff",
-    marginLeft: "10px",
-    marginBottom: "15px",
-    borderRadius: "10px",
+    marginLeft: "1.6rem",
+    marginBottom: "1.6rem",
+    borderRadius: "0.6rem",
 })
 export const cardTop = (rest) =>({
     ...rest,
@@ -34,30 +34,30 @@ export const cardRight = (rest) =>({
    flexDirection: 'column',
    flex: 8,
    justifyContent: "space-between",
-   padding: "0 0px 0 10px",
+   padding: "0 0 0 1.6rem",
   
    
 })
 
 export const cardLeft = (rest) =>({
     ...rest,
+    position: "relative",
     display: "flex",
     flex: 4,
-    minWidth: "149px",
-    maxWidth: "155px",
-    maxHeight: "155px",
-    minHeight: "149px",
+    minWidth: "16rem",
+    minHeight: "16rem",
     overflowY: "hidden",
     overflowX: "hidden",
     justifyContent: 'center',
-    padding: "10px",
+    margin: "0.4rem",
+    borderRadius: "0.6rem",
 })
 
 export const button = (rest) =>({
     ...rest,
     display: "flex",
     justifyContent: 'center',
-    padding :"10px",
+    padding :"0.6rem",
     fontFamily: "'Montserrat Alternates', sans-serif"
 
 })
